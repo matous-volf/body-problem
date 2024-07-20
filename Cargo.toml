@@ -1,5 +1,6 @@
 [workspace]
 
 members = [
+    "body_problem",
 ]
 resolver = "2"
