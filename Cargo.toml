@@ -1,6 +1,6 @@
 [workspace]
 
 members = [
-    "body_problem",
+    "body_problem", "body_problem_web_app",
 ]
 resolver = "2"
