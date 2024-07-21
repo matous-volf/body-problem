@@ -7,9 +7,9 @@ const BODY_DISTANCE_MIN: f64 = 50f64;
 
 #[derive(Clone, Debug)]
 pub struct Body {
-    mass: f64,
-    position: Vector2<f64>,
-    velocity: Vector2<f64>,
+    pub mass: f64,
+    pub position: Vector2<f64>,
+    pub velocity: Vector2<f64>,
 }
 
 impl Body {
