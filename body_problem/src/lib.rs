@@ -18,6 +18,14 @@ impl Body {
     }
 }
 
+impl PartialEq for Body {
+    fn eq(&self, other: &Self) -> bool {
+        self.mass == other.mass &&
+            self.position == other.position &&
+            self.velocity == other.velocity
+    }
+}
+
 pub fn simulate(bodies: &[Body], step: f64) -> Vec<Body> {
     let mut bodies_new = bodies.to_vec();
 
