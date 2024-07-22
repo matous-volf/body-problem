@@ -1,11 +1,12 @@
 use std::cmp::max_by;
 
 use nalgebra::Vector2;
+use serde::{Deserialize, Serialize};
 
 const GRAVITATIONAL_CONSTANT: f64 = 6.6743e-11;
 const BODY_DISTANCE_MIN: f64 = 50f64;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Body {
     pub mass: f64,
     pub position: Vector2<f64>,
