@@ -1,38 +1,58 @@
 use std::f64::consts::PI;
+use std::rc::Rc;
 
+use gloo_utils::format::JsValueSerdeExt;
 use nalgebra::Vector2;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement};
 use web_sys::wasm_bindgen::{JsCast, JsValue};
 use yew::prelude::*;
-use yew_hooks::use_interval;
+use yew_agent::prelude::{use_reactor_subscription, UseReactorSubscriptionHandle};
+use yew_agent::reactor::ReactorProvider;
 
-use body_problem::{Body, simulate};
+use body_problem::Body;
+
+use crate::reactor::SimulationReactor;
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let bodies = use_state(|| vec![
+    html! {
+        <ReactorProvider<SimulationReactor> path="/simulation_reactor.js">
+        <main>
+            <SimulationPanel/>
+        </main>
+        </ReactorProvider<SimulationReactor>>
+    }
+}
+
+#[function_component(SimulationPanel)]
+pub fn simulation_panel() -> Html {
+    let bodies = use_state(|| Rc::new(vec![
         Body::new(1e16, Vector2::new(0f64, 0f64), Vector2::new(0f64, 0f64)),
         Body::new(1e16, Vector2::new(100f64, -100f64), Vector2::new(0f64, 0f64)),
         Body::new(1e16, Vector2::new(-200f64, -100f64), Vector2::new(0f64, 0f64)),
-    ]);
+    ]));
+
+    let simulation_agent: UseReactorSubscriptionHandle<SimulationReactor> = use_reactor_subscription::<SimulationReactor>();
 
     {
+        let simulation_agent = simulation_agent.clone();
         let bodies = bodies.clone();
-        use_interval(
-            move || {
-                let mut bodies_new = (*bodies).clone();
-                for _ in 0..10 {
-                    bodies_new = simulate(&bodies_new, 0.001f64);
-                }
-                bodies.set(bodies_new);
-            },
-            10,
-        );
+        use_effect_with((), move |_| {
+            simulation_agent.send((*bodies).to_vec());
+        });
     }
+
+    let b = simulation_agent.last().map(|b| b.to_vec()).unwrap_or_default();
 
     html! {
         <>
-            <BodyCanvas bodies={(*bodies).clone()}/>
+        <p>
+            {b.iter().map(|body| {
+                    format!("Body at ({}, {})", body.position.x, body.position.y)
+                }).collect::<Vec<String>>().join("\n")
+            }
+        </p>
+            <BodyCanvas bodies={b}/>
         </>
     }
 }
