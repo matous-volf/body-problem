@@ -2,7 +2,7 @@ use std::f64::consts::PI;
 
 use nalgebra::Vector2;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement};
-use web_sys::wasm_bindgen::JsCast;
+use web_sys::wasm_bindgen::{JsCast, JsValue};
 use yew::prelude::*;
 use yew_hooks::use_interval;
 
@@ -52,7 +52,11 @@ pub fn body_canvas(props: &BodyCanvasProps) -> Html {
             if let Some(canvas) = canvas_ref.cast::<HtmlCanvasElement>() {
                 let canvas: HtmlCanvasElement = canvas;
                 let context: CanvasRenderingContext2d = canvas
-                    .get_context("2d")
+                    .get_context_with_context_options("2d", &JsValue::from_serde(&serde_json::json!({
+                        "alpha": false,
+                        "depth": false,
+                        "stencil": false,
+                    })).unwrap())
                     .unwrap()
                     .unwrap()
                     .dyn_into::<CanvasRenderingContext2d>()
