@@ -4,7 +4,7 @@ use nalgebra::Vector2;
 use serde::{Deserialize, Serialize};
 
 const GRAVITATIONAL_CONSTANT: f64 = 6.6743e-11;
-const BODY_DISTANCE_MIN: f64 = 50f64;
+const BODY_DISTANCE_MIN: f64 = 10f64;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Body {
@@ -16,6 +16,14 @@ pub struct Body {
 impl Body {
     pub fn new(mass: f64, position: Vector2<f64>, velocity: Vector2<f64>) -> Self {
         Self { mass, position, velocity }
+    }
+    
+    pub fn potential_energy_to(&self, other: &Self) -> f64 {
+        -GRAVITATIONAL_CONSTANT * self.mass * other.mass / max_by((self.position - other.position).norm(), BODY_DISTANCE_MIN, |a: &f64, b: &f64| a.partial_cmp(b).unwrap())
+    }
+    
+    pub fn kinetic_energy(&self) -> f64 {
+        0.5 * self.mass * self.velocity.norm_squared()
     }
 }
 
@@ -34,7 +42,7 @@ pub fn simulate(bodies: &[Body], step: f64) -> Vec<Body> {
         let force = bodies.iter().enumerate()
             .filter(|&(index2, _)| index1 != index2)
             .map(|(_, body2)| GRAVITATIONAL_CONSTANT * body1.mass * body2.mass * (body2.position - body1.position)
-                / max_by((body2.position - body1.position).norm().powi(3), BODY_DISTANCE_MIN, |a: &f64, b: &f64| a.partial_cmp(b).unwrap()))
+                / max_by((body2.position - body1.position).norm(), BODY_DISTANCE_MIN, |a: &f64, b: &f64| a.partial_cmp(b).unwrap()).powi(3))
             .sum::<Vector2<f64>>();
 
         let acceleration = force / body1.mass;
