@@ -72,7 +72,7 @@ pub fn body_canvas(props: &BodyCanvasProps) -> Html {
 
                     for rendered_body in rendered_bodies {
                         context.begin_path();
-                        context.arc(rendered_body.body.position.x, rendered_body.body.position.y, 10f64, 0f64, 2f64 * PI).unwrap();
+                        context.arc(rendered_body.body.position.x, -rendered_body.body.position.y, 10f64, 0f64, 2f64 * PI).unwrap();
                         context.fill();
                         context.close_path();
                     }
