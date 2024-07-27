@@ -59,6 +59,7 @@ pub fn simulation_panel() -> Html {
     };
 
     let toggle_pause_callback = {
+        let rendered_bodies = rendered_bodies.clone();
         let simulation_paused = simulation_paused.clone();
         let rendered_bodies_new = rendered_bodies_new.clone();
 
@@ -76,6 +77,17 @@ pub fn simulation_panel() -> Html {
             }
         )
     };
+    
+    let body_edit_callback = {
+        Callback::from(
+            move |rendered_body: RenderedBody| {
+                let index = rendered_body.index;
+                let mut rendered_bodies_new = (*rendered_bodies).to_vec();
+                rendered_bodies_new[index] = rendered_body;
+                rendered_bodies.set(rendered_bodies_new);
+            }
+        )
+    };
 
     html! {
         <>
@@ -84,7 +96,7 @@ pub fn simulation_panel() -> Html {
                 <SimulationControls simulation_paused={*simulation_paused} {toggle_pause_callback}/>
             </section>
             <section class="p-4">
-                <BodyTable rendered_bodies={rendered_bodies_new}/>
+                <BodyTable rendered_bodies={rendered_bodies_new} edit_allowed={*simulation_paused} edit_callback={body_edit_callback}/>
             </section>
         </>
     }

@@ -6,6 +6,8 @@ use crate::models::RenderedBody;
 #[derive(Properties, PartialEq)]
 pub struct BodyTableProps {
     pub(crate) rendered_bodies: Vec<RenderedBody>,
+    pub(crate) edit_allowed: bool,
+    pub(crate) edit_callback: Callback<RenderedBody>,
 }
 
 #[function_component(BodyTable)]
@@ -27,8 +29,9 @@ pub fn body_table(props: &BodyTableProps) -> Html {
 
                 <tbody class="divide-y divide-white/25">
                     {props.rendered_bodies.iter().enumerate().map(|(index, rendered_body)| {
+                        let edit_callback_clone = props.edit_callback.clone();
                         html! {
-                            <BodyTableRow index={index} rendered_body={rendered_body.clone()} edit_callback={Callback::noop()}/>
+                            <BodyTableRow {index} rendered_body={rendered_body.clone()} edit_allowed={props.edit_allowed} edit_callback={edit_callback_clone}/>
                         }
                     }).collect::<Html>()}
                 </tbody>

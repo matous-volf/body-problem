@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 yew = { version = "0.21.0", features = ["csr"] }
-web-sys = { version = "0.3.69", features = ["HtmlCanvasElement", "CanvasRenderingContext2d", "Window"] }
+web-sys = { version = "0.3.69", features = ["HtmlCanvasElement", "CanvasRenderingContext2d", "Window", "InputEvent"] }
 body_problem = { path = "../body_problem" }
 nalgebra = "0.33.0"
 yew-hooks = "0.3.2"

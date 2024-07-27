@@ -43,7 +43,6 @@ pub fn body_canvas(props: &BodyCanvasProps) -> Html {
                             .unwrap();
 
                         context_new.translate((canvas.width() / 2) as f64, (canvas.height() / 2) as f64).unwrap();
-                        context_new.set_fill_style(&"#ffffff".into());
 
                         context.set(Some(context_new));
                     });
@@ -71,6 +70,7 @@ pub fn body_canvas(props: &BodyCanvasProps) -> Html {
                     context.clear_rect(-((canvas.width() / 2) as f64), -((canvas.height() / 2) as f64), canvas.width() as f64, canvas.height() as f64);
 
                     for rendered_body in rendered_bodies {
+                        context.set_fill_style(&rendered_body.color.as_str().into());
                         context.begin_path();
                         context.arc(rendered_body.body.position.x, -rendered_body.body.position.y, 10f64, 0f64, 2f64 * PI).unwrap();
                         context.fill();
