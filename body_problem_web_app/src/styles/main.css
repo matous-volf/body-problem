@@ -8,15 +8,11 @@
 @layer base {
     @font-face {
         font-family: "Ubuntu Sans";
-        font-style: normal;
-        font-weight: 400;
         src: url(/assets/fonts/ubuntu-sans.ttf) format("truetype");
     }
 
     @font-face {
         font-family: "Ubuntu Mono";
-        font-style: normal;
-        font-weight: 400;
         src: url(/assets/fonts/ubuntu-mono.ttf) format("truetype");
     }
 }
