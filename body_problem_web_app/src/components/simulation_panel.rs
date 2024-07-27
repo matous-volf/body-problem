@@ -11,7 +11,6 @@ use crate::models::RenderedBody;
 
 #[function_component(SimulationPanel)]
 pub fn simulation_panel() -> Html {
-    let rendered_bodies_previous = use_state(|| Vec::new());
     let rendered_bodies = use_state(|| vec![
         RenderedBody {
             index: 0,
@@ -32,6 +31,8 @@ pub fn simulation_panel() -> Html {
             color: "#ffffff".to_string(),
         },
     ]);
+    let rendered_bodies_after_last_edit = use_state(|| (*rendered_bodies).clone());
+    let rendered_bodies_edited_this_pause = use_state(|| false);
     let simulation_paused = use_state(|| false);
 
     let simulation_agent: UseReactorSubscriptionHandle<SimulationReactor> = use_reactor_subscription::<SimulationReactor>();
@@ -60,8 +61,9 @@ pub fn simulation_panel() -> Html {
     };
 
     let toggle_pause_callback = {
-        let rendered_bodies_previous = rendered_bodies_previous.clone();
         let rendered_bodies = rendered_bodies.clone();
+        let rendered_bodies_after_last_edit = rendered_bodies_after_last_edit.clone();
+        let rendered_bodies_edited_this_pause = rendered_bodies_edited_this_pause.clone();
         let simulation_paused = simulation_paused.clone();
         let rendered_bodies_new = rendered_bodies_new.clone();
         let simulation_agent = simulation_agent.clone();
@@ -72,10 +74,13 @@ pub fn simulation_panel() -> Html {
                 simulation_paused.set(simulation_paused_new);
 
                 if simulation_paused_new {
-                    rendered_bodies_previous.set((*rendered_bodies).to_vec());
                     rendered_bodies.set(rendered_bodies_new.to_vec());
                     simulation_agent.send(None);
                 } else {
+                    if *rendered_bodies_edited_this_pause {
+                        rendered_bodies_after_last_edit.set((*rendered_bodies).to_vec());
+                        rendered_bodies_edited_this_pause.set(false);
+                    }
                     simulation_agent.send(Some(rendered_bodies_new.iter().map(|b| b.body.clone()).collect()));
                 }
             }
@@ -83,7 +88,7 @@ pub fn simulation_panel() -> Html {
     };
 
     let reset_callback = {
-        let rendered_bodies_previous = rendered_bodies_previous.clone();
+        let rendered_bodies_after_last_edit = rendered_bodies_after_last_edit.clone();
         let rendered_bodies = rendered_bodies.clone();
         let simulation_paused = simulation_paused.clone();
         let simulation_agent = simulation_agent.clone();
@@ -91,19 +96,29 @@ pub fn simulation_panel() -> Html {
         Callback::from(
             move |_| {
                 if *simulation_paused {
-                    rendered_bodies.set((*rendered_bodies_previous).to_vec());
+                    rendered_bodies.set((*rendered_bodies_after_last_edit).to_vec());
                 } else {
-                    simulation_agent.send(Some((*rendered_bodies).iter().map(|b| b.body.clone()).collect()));
+                    simulation_agent.send(Some((*rendered_bodies_after_last_edit).iter().map(|b| b.body.clone()).collect()));
                 }
             }
         )
     };
 
     let body_edit_callback = {
+        let rendered_bodies_edited_this_pause = rendered_bodies_edited_this_pause.clone();
+        
         Callback::from(
             move |rendered_body: RenderedBody| {
                 let index = rendered_body.index;
                 let mut rendered_bodies_new = (*rendered_bodies).to_vec();
+                
+                /* important for preserving the `rendered_bodies_last_edit` when the user just
+                   clicks into an input or edits a body to the same value as before */
+                if rendered_bodies_new[index] == rendered_body {
+                    return;
+                }
+                rendered_bodies_edited_this_pause.set(true);
+                
                 rendered_bodies_new[index] = rendered_body;
                 rendered_bodies.set(rendered_bodies_new);
             }
