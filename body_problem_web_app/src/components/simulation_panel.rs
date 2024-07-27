@@ -11,6 +11,7 @@ use crate::models::RenderedBody;
 
 #[function_component(SimulationPanel)]
 pub fn simulation_panel() -> Html {
+    let rendered_bodies_previous = use_state(|| Vec::new());
     let rendered_bodies = use_state(|| vec![
         RenderedBody {
             index: 0,
@@ -59,9 +60,11 @@ pub fn simulation_panel() -> Html {
     };
 
     let toggle_pause_callback = {
+        let rendered_bodies_previous = rendered_bodies_previous.clone();
         let rendered_bodies = rendered_bodies.clone();
         let simulation_paused = simulation_paused.clone();
         let rendered_bodies_new = rendered_bodies_new.clone();
+        let simulation_agent = simulation_agent.clone();
 
         Callback::from(
             move |_| {
@@ -69,6 +72,7 @@ pub fn simulation_panel() -> Html {
                 simulation_paused.set(simulation_paused_new);
 
                 if simulation_paused_new {
+                    rendered_bodies_previous.set((*rendered_bodies).to_vec());
                     rendered_bodies.set(rendered_bodies_new.to_vec());
                     simulation_agent.send(None);
                 } else {
@@ -77,7 +81,24 @@ pub fn simulation_panel() -> Html {
             }
         )
     };
-    
+
+    let reset_callback = {
+        let rendered_bodies_previous = rendered_bodies_previous.clone();
+        let rendered_bodies = rendered_bodies.clone();
+        let simulation_paused = simulation_paused.clone();
+        let simulation_agent = simulation_agent.clone();
+
+        Callback::from(
+            move |_| {
+                if *simulation_paused {
+                    rendered_bodies.set((*rendered_bodies_previous).to_vec());
+                } else {
+                    simulation_agent.send(Some((*rendered_bodies).iter().map(|b| b.body.clone()).collect()));
+                }
+            }
+        )
+    };
+
     let body_edit_callback = {
         Callback::from(
             move |rendered_body: RenderedBody| {
@@ -93,7 +114,7 @@ pub fn simulation_panel() -> Html {
         <>
             <BodyCanvas rendered_bodies={rendered_bodies_new.clone()}/>
             <section class="p-4">
-                <SimulationControls simulation_paused={*simulation_paused} {toggle_pause_callback}/>
+                <SimulationControls simulation_paused={*simulation_paused} {toggle_pause_callback} {reset_callback}/>
             </section>
             <section class="p-4">
                 <BodyTable rendered_bodies={rendered_bodies_new} edit_allowed={*simulation_paused} edit_callback={body_edit_callback}/>
