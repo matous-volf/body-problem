@@ -12,7 +12,7 @@ pub struct SimulationControlsProps {
 #[function_component(SimulationControls)]
 pub fn simulation_controls(props: &SimulationControlsProps) -> Html {
     html! {
-        <>
+        <div class="flex flex-row gap-3">
             <Button onclick={props.toggle_pause_callback.clone()} class="w-24">
                 {if props.simulation_paused {
                     html! {
@@ -27,6 +27,6 @@ pub fn simulation_controls(props: &SimulationControlsProps) -> Html {
             <Button onclick={props.reset_callback.clone()}>
                 <i class="fa-solid fa-rotate-right mr-2"></i> {"reset"}
             </Button>
-        </>
+        </div>
     }
 }

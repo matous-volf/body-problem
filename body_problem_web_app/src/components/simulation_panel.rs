@@ -106,19 +106,19 @@ pub fn simulation_panel() -> Html {
 
     let body_edit_callback = {
         let rendered_bodies_edited_this_pause = rendered_bodies_edited_this_pause.clone();
-        
+
         Callback::from(
             move |rendered_body: RenderedBody| {
                 let index = rendered_body.index;
                 let mut rendered_bodies_new = (*rendered_bodies).to_vec();
-                
+
                 /* important for preserving the `rendered_bodies_last_edit` when the user just
                    clicks into an input or edits a body to the same value as before */
                 if rendered_bodies_new[index] == rendered_body {
                     return;
                 }
                 rendered_bodies_edited_this_pause.set(true);
-                
+
                 rendered_bodies_new[index] = rendered_body;
                 rendered_bodies.set(rendered_bodies_new);
             }
@@ -128,10 +128,8 @@ pub fn simulation_panel() -> Html {
     html! {
         <>
             <BodyCanvas rendered_bodies={rendered_bodies_new.clone()}/>
-            <section class="p-4">
+            <section class="p-4 flex flex-col gap-4">
                 <SimulationControls simulation_paused={*simulation_paused} {toggle_pause_callback} {reset_callback}/>
-            </section>
-            <section class="p-4">
                 <BodyTable rendered_bodies={rendered_bodies_new} edit_allowed={*simulation_paused} edit_callback={body_edit_callback}/>
             </section>
         </>
