@@ -39,14 +39,11 @@ pub fn simulate(bodies: &[Body], step: f64) -> Vec<Body> {
     let mut bodies_new = bodies.to_vec();
 
     for (index1, body1) in bodies_new.iter_mut().enumerate() {
-        let force = bodies.iter().enumerate()
+        body1.velocity += bodies.iter().enumerate()
             .filter(|&(index2, _)| index1 != index2)
-            .map(|(_, body2)| GRAVITATIONAL_CONSTANT * body1.mass * body2.mass * (body2.position - body1.position)
+            .map(|(_, body2)| GRAVITATIONAL_CONSTANT * body2.mass * (body2.position - body1.position)
                 / max_by((body2.position - body1.position).norm(), BODY_DISTANCE_MIN, |a: &f64, b: &f64| a.partial_cmp(b).unwrap()).powi(3))
-            .sum::<Vector2<f64>>();
-
-        let acceleration = force / body1.mass;
-        body1.velocity += acceleration * step;
+            .sum::<Vector2<f64>>() * step;
     }
 
     for body in bodies_new.iter_mut() {
