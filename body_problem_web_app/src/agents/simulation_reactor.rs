@@ -26,6 +26,8 @@ pub async fn simulation_reactor(
     let mut none_sent = false;
 
     loop {
+        async_std::task::sleep(Duration::from_millis(20)).await;
+        
         if let Some(Some(bodies_new)) = futures::future::poll_fn(|cx| scope.poll_next_unpin(cx)).now_or_never() {
             bodies = bodies_new;
         }
@@ -36,7 +38,6 @@ pub async fn simulation_reactor(
             }
 
             none_sent = true;
-            async_std::task::sleep(Duration::from_millis(20)).await;
             continue;
         }
         none_sent = false;
@@ -48,7 +49,5 @@ pub async fn simulation_reactor(
         for _ in 0..200 {
             bodies = Some(simulate(bodies.as_ref().unwrap(), 0.0001));
         }
-
-        async_std::task::sleep(Duration::from_millis(20)).await;
     }
 }
