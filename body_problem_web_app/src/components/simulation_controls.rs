@@ -16,7 +16,7 @@ pub fn simulation_controls(props: &SimulationControlsProps) -> Html {
             <Button onclick={props.toggle_pause_callback.clone()} class="w-24 py-2 px-4">
                 {if props.simulation_paused {
                     html! {
-                        <><i class="fa-solid fa-play mr-2"></i> {"play"}</>
+                        <><i class="fa-solid fa-play mr-2"></i>{"play"}</>
                     }
                 } else {
                     html! {
@@ -25,7 +25,7 @@ pub fn simulation_controls(props: &SimulationControlsProps) -> Html {
                 }}
             </Button>
             <Button onclick={props.reset_callback.clone()} class="w-24 py-2 px-4">
-                <i class="fa-solid fa-rotate-right mr-2"></i> {"reset"}
+                <i class="fa-solid fa-rotate-right mr-2"></i>{"reset"}
             </Button>
         </div>
     }

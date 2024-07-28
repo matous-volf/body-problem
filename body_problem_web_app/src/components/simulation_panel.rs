@@ -1,4 +1,5 @@
 use nalgebra::Vector2;
+use web_sys::MouseEvent;
 use yew::{Callback, function_component, Html, html, use_effect_with, use_state};
 use yew_agent::prelude::{use_reactor_subscription, UseReactorSubscriptionHandle};
 
@@ -103,6 +104,33 @@ pub fn simulation_panel() -> Html {
             }
         )
     };
+    
+    let body_add_callback = {
+        let rendered_bodies = rendered_bodies.clone();
+        let rendered_bodies_edited_this_pause = rendered_bodies_edited_this_pause.clone();
+        let simulation_paused = simulation_paused.clone();
+        let toggle_pause_callback = toggle_pause_callback.clone();
+        let rendered_bodies_new = rendered_bodies_new.clone();
+
+        Callback::from(
+            move |_| {
+                if !*simulation_paused {
+                    toggle_pause_callback.emit(MouseEvent::new("").unwrap());
+                }
+                
+                let mut rendered_bodies_new: Vec<RenderedBody> = rendered_bodies_new.to_vec();
+                rendered_bodies_edited_this_pause.set(true);
+
+                rendered_bodies_new.push(RenderedBody {
+                    index: rendered_bodies_new.len(),
+                    body: Body::new(1f64, Vector2::new(0f64, 0f64), Vector2::new(0f64, 0f64)),
+                    potential_energy: 0f64,
+                    color: "#ffffff".to_string(),
+                });
+                rendered_bodies.set(rendered_bodies_new);
+            }
+        )
+    };
 
     let body_edit_callback = {
         let rendered_bodies = rendered_bodies.clone();
@@ -110,18 +138,17 @@ pub fn simulation_panel() -> Html {
 
         Callback::from(
             move |rendered_body: RenderedBody| {
-                let index = rendered_body.index;
                 let mut rendered_bodies_new = (*rendered_bodies).to_vec();
-
+                let index = rendered_body.index;
                 /* important for preserving the `rendered_bodies_last_edit` when the user just
                    clicks into an input or edits a body to the same value as before */
                 if rendered_bodies_new[index] == rendered_body {
                     return;
                 }
-                rendered_bodies_edited_this_pause.set(true);
-
+                
                 rendered_bodies_new[index] = rendered_body;
                 rendered_bodies.set(rendered_bodies_new);
+                rendered_bodies_edited_this_pause.set(true);
             }
         )
     };
@@ -133,13 +160,13 @@ pub fn simulation_panel() -> Html {
         Callback::from(
             move |index: usize| {
                 let mut rendered_bodies_new: Vec<RenderedBody> = (*rendered_bodies).to_vec();
-                rendered_bodies_edited_this_pause.set(true);
-
                 rendered_bodies_new.remove(index);
                 for (index, rendered_body) in rendered_bodies_new.iter_mut().enumerate() {
                     rendered_body.index = index;
                 }
+                
                 rendered_bodies.set(rendered_bodies_new);
+                rendered_bodies_edited_this_pause.set(true);
             }
         )
     };
@@ -149,7 +176,7 @@ pub fn simulation_panel() -> Html {
             <BodyCanvas rendered_bodies={rendered_bodies_new.clone()}/>
             <section class="p-4 flex flex-col gap-4">
                 <SimulationControls simulation_paused={*simulation_paused} {toggle_pause_callback} {reset_callback}/>
-                <BodyTable rendered_bodies={rendered_bodies_new} edit_allowed={*simulation_paused} edit_callback={body_edit_callback} remove_callback={body_remove_callback}/>
+                <BodyTable rendered_bodies={rendered_bodies_new} edit_allowed={*simulation_paused} add_callback={body_add_callback} edit_callback={body_edit_callback} remove_callback={body_remove_callback}/>
             </section>
         </>
     }
