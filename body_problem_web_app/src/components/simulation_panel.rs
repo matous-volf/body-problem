@@ -8,6 +8,7 @@ use body_problem::Body;
 use crate::agents::SimulationReactor;
 use crate::components::{BodyCanvas, BodyTable};
 use crate::components::simulation_controls::SimulationControls;
+use crate::components::trajectory_canvas::TrajectoryCanvas;
 use crate::models::RenderedBody;
 
 #[function_component(SimulationPanel)]
@@ -173,7 +174,10 @@ pub fn simulation_panel() -> Html {
 
     html! {
         <>
-            <BodyCanvas rendered_bodies={rendered_bodies_new.clone()}/>
+            <div class="h-[700px]">
+                <TrajectoryCanvas rendered_bodies={rendered_bodies_new.clone()}/>
+                <BodyCanvas rendered_bodies={rendered_bodies_new.clone()}/>
+            </div>
             <section class="p-4 flex flex-col gap-4">
                 <SimulationControls simulation_paused={*simulation_paused} {toggle_pause_callback} {reset_callback}/>
                 <BodyTable rendered_bodies={rendered_bodies_new} edit_allowed={*simulation_paused} add_callback={body_add_callback} edit_callback={body_edit_callback} remove_callback={body_remove_callback}/>
