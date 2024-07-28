@@ -1,12 +1,9 @@
-use gloo_console::__macro::JsValue;
-use gloo_events::EventListener;
-use gloo_utils::format::JsValueSerdeExt;
 use nalgebra::Vector2;
-use web_sys::{CanvasRenderingContext2d, Event, HtmlCanvasElement, window};
-use web_sys::wasm_bindgen::JsCast;
-use yew::{Callback, function_component, Html, html, Properties, use_effect_with, use_node_ref, use_state};
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement};
+use yew::{function_component, Html, html, Properties, use_effect_with, use_node_ref, use_state};
+
 use crate::models::RenderedBody;
-use crate::utils::CanvasClear;
+use crate::utils::{CanvasClear, SimulationCanvasInitialize};
 
 #[derive(Properties, PartialEq)]
 pub struct TrajectoryCanvasProps {
@@ -29,33 +26,7 @@ pub fn trajectory_canvas(props: &TrajectoryCanvasProps) -> Html {
                 let mut resize_listener = None;
                 if let Some(canvas) = canvas {
                     let canvas: HtmlCanvasElement = canvas.clone();
-
-                    let initialize_context = Callback::from(move |_: Event| {
-                        canvas.set_width(window().unwrap().inner_width().unwrap().as_f64().unwrap() as u32);
-
-                        let context_new: CanvasRenderingContext2d = canvas
-                            .get_context_with_context_options("2d", &JsValue::from_serde(&serde_json::json!({
-                                "alpha": false,
-                                "depth": false,
-                                "stencil": false,
-                            })).unwrap())
-                            .unwrap()
-                            .unwrap()
-                            .dyn_into::<CanvasRenderingContext2d>()
-                            .unwrap();
-
-                        context_new.translate((canvas.width() / 2) as f64, (canvas.height() / 2) as f64).unwrap();
-
-                        context.set(Some(context_new));
-                    });
-
-                    initialize_context.emit(Event::new("").unwrap());
-
-                    resize_listener = Some(EventListener::new(
-                        &window().unwrap(),
-                        "resize",
-                        move |e| initialize_context.emit(e.clone()),
-                    ));
+                    resize_listener = Some(canvas.initialize_for_simulation(context, false));
                 }
 
                 move || drop(resize_listener)
@@ -73,7 +44,7 @@ pub fn trajectory_canvas(props: &TrajectoryCanvasProps) -> Html {
             context.clear().unwrap();
 
             // reversing for a more intuitive layer order
-            for (body_index, rendered_body) in (0..body_positions_new[0].len()).map(|body_index| (body_index, &props.rendered_bodies[body_index])) {
+            for (body_index, rendered_body) in (0..body_positions_new[0].len()).map(|body_index| (body_index, &props.rendered_bodies[body_index])).rev() {
                 let starting_position = body_positions_new.first().unwrap()[body_index];
                 context.set_stroke_style(&rendered_body.color.as_str().into());
                 context.begin_path();
