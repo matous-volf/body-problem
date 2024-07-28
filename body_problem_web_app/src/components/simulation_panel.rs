@@ -36,7 +36,8 @@ pub fn simulation_panel() -> Html {
     let rendered_bodies_after_last_edit = use_state(|| (*rendered_bodies).clone());
     let rendered_bodies_edited_this_pause = use_state(|| false);
     let simulation_paused = use_state(|| false);
-
+    let simulation_reset = use_state(|| false);
+    
     let simulation_agent: UseReactorSubscriptionHandle<SimulationReactor> = use_reactor_subscription::<SimulationReactor>();
 
     {
@@ -52,14 +53,28 @@ pub fn simulation_panel() -> Html {
     } else {
         let bodies_new = simulation_agent.last().map(|bodies| bodies.as_ref().as_ref()).unwrap_or_default();
 
-        bodies_new.map(|bodies| bodies.iter().enumerate().map(|(index, body)| {
-            RenderedBody {
-                index,
-                body: body.clone(),
-                potential_energy: bodies.iter().enumerate().filter(|(index2, _)| index != *index2).map(|(_, body2)| body.potential_energy_to(body2)).sum(),
-                color: (*rendered_bodies)[index].color.clone(),
+        // the simulation was reset, and we are waiting for the agent to send the reset bodies
+        if *simulation_reset {
+            if let Some(bodies_new) = bodies_new {
+                if bodies_new.iter().eq((*rendered_bodies_after_last_edit).iter().map(|b| &b.body)) {
+                    simulation_reset.set(false);
+                }
             }
-        }).collect()).unwrap_or_else(|| (*rendered_bodies).to_vec())
+            
+            (*rendered_bodies_after_last_edit).to_vec()
+        } else {
+            match bodies_new { 
+                None => (*rendered_bodies).to_vec(),
+                Some(bodies_new) => bodies_new.iter().enumerate().map(|(index, body)| {
+                    RenderedBody {
+                        index,
+                        body: body.clone(),
+                        potential_energy: bodies_new.iter().enumerate().filter(|(index2, _)| index != *index2).map(|(_, body2)| body.potential_energy_to(body2)).sum(),
+                        color: (*rendered_bodies)[index].color.clone(),
+                    }
+                }).collect()
+            }
+        }
     };
 
     let toggle_pause_callback = {
@@ -94,9 +109,11 @@ pub fn simulation_panel() -> Html {
         let rendered_bodies_after_last_edit = rendered_bodies_after_last_edit.clone();
         let simulation_paused = simulation_paused.clone();
         let simulation_agent = simulation_agent.clone();
+        let simulation_reset = simulation_reset.clone();
 
         Callback::from(
             move |_| {
+                simulation_reset.set(true);
                 if *simulation_paused {
                     rendered_bodies.set((*rendered_bodies_after_last_edit).to_vec());
                 } else {
@@ -175,7 +192,7 @@ pub fn simulation_panel() -> Html {
     html! {
         <>
             <div class="h-[700px]">
-                <TrajectoryCanvas rendered_bodies={rendered_bodies_new.clone()}/>
+                <TrajectoryCanvas rendered_bodies={rendered_bodies_new.clone()} rendered_bodies_edited_this_pause={*rendered_bodies_edited_this_pause} simulation_paused={*simulation_paused} simulation_reset={*simulation_reset}/>
                 <BodyCanvas rendered_bodies={rendered_bodies_new.clone()}/>
             </div>
             <section class="p-4 flex flex-col gap-4">

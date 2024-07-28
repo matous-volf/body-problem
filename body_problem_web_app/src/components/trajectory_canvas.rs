@@ -5,9 +5,14 @@ use yew::{function_component, Html, html, Properties, use_effect_with, use_node_
 use crate::models::RenderedBody;
 use crate::utils::{CanvasClear, SimulationCanvasInitialize};
 
+const TRAJECTORY_MAX_SEGMENT_LENGTH: f64 = 5f64;
+
 #[derive(Properties, PartialEq)]
 pub struct TrajectoryCanvasProps {
     pub(crate) rendered_bodies: Vec<RenderedBody>,
+    pub(crate) rendered_bodies_edited_this_pause: bool,
+    pub(crate) simulation_paused: bool,
+    pub(crate) simulation_reset: bool,
 }
 
 #[function_component(TrajectoryCanvas)]
@@ -34,10 +39,48 @@ pub fn trajectory_canvas(props: &TrajectoryCanvasProps) -> Html {
         );
     }
 
+    let reset = {
+        let body_positions = body_positions.clone();
+        let context = (*context).clone();
+        move || {
+            body_positions.set(Vec::new());
+            if let Some(context) = context {
+                context.clear().unwrap();
+            }
+        }
+    };
+
+    {
+        let reset = reset.clone();
+        use_effect_with(
+            props.rendered_bodies_edited_this_pause,
+            move |&rendered_bodies_edited_this_pause| {
+                if rendered_bodies_edited_this_pause {
+                    reset();
+                }
+            },
+        );
+    }
+
+    {
+        let reset = reset.clone();
+        use_effect_with(
+            props.simulation_reset,
+            move |&simulation_reset| {
+                if simulation_reset {
+                    reset();
+                }
+            },
+        );
+    }
+
     if let (Some(context), Some(_)) = ((*context).clone(), canvas) {
         let context: CanvasRenderingContext2d = context;
-        if props.rendered_bodies.iter().any(|rendered_body|
-        (rendered_body.body.position - (*body_positions).last().unwrap()[rendered_body.index]).norm() > 5f64) {
+        if !props.simulation_paused
+            && !props.simulation_reset
+            && ((*body_positions).is_empty()
+            || props.rendered_bodies.iter().any(|rendered_body|
+        (rendered_body.body.position - (*body_positions).last().unwrap()[rendered_body.index]).norm() > TRAJECTORY_MAX_SEGMENT_LENGTH)) {
             let mut body_positions_new: Vec<Vec<Vector2<f64>>> = (*body_positions).clone();
             body_positions_new.push(props.rendered_bodies.iter().map(|rendered_body| rendered_body.body.position).collect());
 
