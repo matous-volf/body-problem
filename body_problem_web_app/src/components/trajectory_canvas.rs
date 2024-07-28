@@ -6,6 +6,7 @@ use web_sys::{CanvasRenderingContext2d, Event, HtmlCanvasElement, window};
 use web_sys::wasm_bindgen::JsCast;
 use yew::{Callback, function_component, Html, html, Properties, use_effect_with, use_node_ref, use_state};
 use crate::models::RenderedBody;
+use crate::utils::CanvasClear;
 
 #[derive(Properties, PartialEq)]
 pub struct TrajectoryCanvasProps {
@@ -61,15 +62,15 @@ pub fn trajectory_canvas(props: &TrajectoryCanvasProps) -> Html {
             },
         );
     }
-    
-    if let (Some(context), Some(canvas)) = ((*context).clone(), canvas) {
+
+    if let (Some(context), Some(_)) = ((*context).clone(), canvas) {
         let context: CanvasRenderingContext2d = context;
         if props.rendered_bodies.iter().any(|rendered_body|
         (rendered_body.body.position - (*body_positions).last().unwrap()[rendered_body.index]).norm() > 5f64) {
             let mut body_positions_new: Vec<Vec<Vector2<f64>>> = (*body_positions).clone();
             body_positions_new.push(props.rendered_bodies.iter().map(|rendered_body| rendered_body.body.position).collect());
 
-            context.clear_rect(-((canvas.width() / 2) as f64), -((canvas.height() / 2) as f64), canvas.width() as f64, canvas.height() as f64);
+            context.clear().unwrap();
 
             // reversing for a more intuitive layer order
             for (body_index, rendered_body) in (0..body_positions_new[0].len()).map(|body_index| (body_index, &props.rendered_bodies[body_index])) {
@@ -82,12 +83,6 @@ pub fn trajectory_canvas(props: &TrajectoryCanvasProps) -> Html {
                 }
                 context.stroke();
             }
-            
-            // for (positions1, positions2) in body_positions_new.iter().tuple_windows() {
-            //     for (position1, position2) in positions1.iter().zip(positions2) {
-            //         
-            //     }
-            // }
 
             body_positions.set(body_positions_new);
         }
