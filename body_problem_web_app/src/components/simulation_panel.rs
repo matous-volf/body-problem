@@ -88,8 +88,8 @@ pub fn simulation_panel() -> Html {
     };
 
     let reset_callback = {
-        let rendered_bodies_after_last_edit = rendered_bodies_after_last_edit.clone();
         let rendered_bodies = rendered_bodies.clone();
+        let rendered_bodies_after_last_edit = rendered_bodies_after_last_edit.clone();
         let simulation_paused = simulation_paused.clone();
         let simulation_agent = simulation_agent.clone();
 
@@ -105,6 +105,7 @@ pub fn simulation_panel() -> Html {
     };
 
     let body_edit_callback = {
+        let rendered_bodies = rendered_bodies.clone();
         let rendered_bodies_edited_this_pause = rendered_bodies_edited_this_pause.clone();
 
         Callback::from(
@@ -124,13 +125,31 @@ pub fn simulation_panel() -> Html {
             }
         )
     };
+    
+    let body_remove_callback = {
+        let rendered_bodies = rendered_bodies.clone();
+        let rendered_bodies_edited_this_pause = rendered_bodies_edited_this_pause.clone();
+
+        Callback::from(
+            move |index: usize| {
+                let mut rendered_bodies_new: Vec<RenderedBody> = (*rendered_bodies).to_vec();
+                rendered_bodies_edited_this_pause.set(true);
+
+                rendered_bodies_new.remove(index);
+                for (index, rendered_body) in rendered_bodies_new.iter_mut().enumerate() {
+                    rendered_body.index = index;
+                }
+                rendered_bodies.set(rendered_bodies_new);
+            }
+        )
+    };
 
     html! {
         <>
             <BodyCanvas rendered_bodies={rendered_bodies_new.clone()}/>
             <section class="p-4 flex flex-col gap-4">
                 <SimulationControls simulation_paused={*simulation_paused} {toggle_pause_callback} {reset_callback}/>
-                <BodyTable rendered_bodies={rendered_bodies_new} edit_allowed={*simulation_paused} edit_callback={body_edit_callback}/>
+                <BodyTable rendered_bodies={rendered_bodies_new} edit_allowed={*simulation_paused} edit_callback={body_edit_callback} remove_callback={body_remove_callback}/>
             </section>
         </>
     }

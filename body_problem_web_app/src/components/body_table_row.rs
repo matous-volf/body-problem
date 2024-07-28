@@ -1,29 +1,28 @@
-use futures::TryFutureExt;
 use web_sys::{FocusEvent, HtmlInputElement, InputEvent};
 use web_sys::wasm_bindgen::JsCast;
 use yew::{Callback, function_component, Html, html, Properties};
 
+use crate::components::button::Button;
 use crate::models::RenderedBody;
 
 #[derive(PartialEq, Properties)]
 pub struct BodyTableRowProps {
-    pub(crate) index: usize,
     pub(crate) rendered_body: RenderedBody,
     pub(crate) edit_allowed: bool,
     pub(crate) edit_callback: Callback<RenderedBody>,
+    pub(crate) remove_callback: Callback<usize>,
 }
 
 #[function_component]
 pub fn BodyTableRow(props: &BodyTableRowProps) -> Html {
-    let index = props.index;
     let rendered_body = &props.rendered_body;
 
     html! {
         <tr class="font-mono text-lg divide-x divide-neutral-600">
             <td class="py-2 px-4 text-center">
-                {index + 1}
+                {rendered_body.index + 1}
             </td>
-            <td class="px-4 align-middle">
+            <td class="px-4 align-middle text-center">
             {
                 if props.edit_allowed {
                     let rendered_body = rendered_body.clone();
@@ -38,7 +37,7 @@ pub fn BodyTableRow(props: &BodyTableRowProps) -> Html {
                     }
                 } else {
                     html! {
-                        <div style={format!("background-color: {};", rendered_body.color)} class="w-12 h-6"></div>
+                        <div style={format!("background-color: {};", rendered_body.color)} class="w-12 h-6 m-auto"></div>
                     }
                 }
             }
@@ -145,6 +144,19 @@ pub fn BodyTableRow(props: &BodyTableRowProps) -> Html {
             }
             <td class="py-2 px-4 text-right">{format!("{:\u{00a0}>25.1}", rendered_body.potential_energy)}</td>
             <td class="py-2 px-4 text-right">{format!("{:\u{00a0}>25.1}", rendered_body.body.kinetic_energy())}</td>
+            {
+                props.edit_allowed.then(|| {
+                    let rendered_body = rendered_body.clone();
+
+                    html! {
+                        <td class="p-1 text-center">
+                            <Button onclick={props.remove_callback.reform(move |_| rendered_body.index)} class="py-1 px-3">
+                                <i class="fa-solid fa-xmark"></i>
+                            </Button>
+                        </td>
+                    }
+                })
+            }
         </tr>
     }
 }
