@@ -4,3 +4,15 @@
 @tailwind components;
 /*noinspection CssInvalidAtRule*/
 @tailwind utilities;
+
+@layer base {
+    @font-face {
+        font-family: "Ubuntu Sans";
+        src: url(/assets/fonts/ubuntu-sans.ttf) format("truetype");
+    }
+
+    @font-face {
+        font-family: "Ubuntu Mono";
+        src: url(/assets/fonts/ubuntu-mono.ttf) format("truetype");
+    }
+}

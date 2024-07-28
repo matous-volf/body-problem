@@ -251,6 +251,7 @@ dependencies = [
  "body_problem",
  "futures",
  "gloo-console 0.3.0",
+ "gloo-events 0.2.0",
  "gloo-utils 0.2.0",
  "log",
  "nalgebra",
