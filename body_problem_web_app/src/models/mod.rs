@@ -1,3 +1,2 @@
-mod rendered_body;
-
-pub use rendered_body::RenderedBody;
+pub(crate) mod rendered_body;
+pub(crate) mod settings;

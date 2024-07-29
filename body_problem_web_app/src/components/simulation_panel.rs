@@ -4,12 +4,13 @@ use yew::{Callback, function_component, Html, html, use_effect_with, use_state};
 use yew_agent::prelude::{use_reactor_subscription, UseReactorSubscriptionHandle};
 
 use body_problem::Body;
-
-use crate::agents::SimulationReactor;
-use crate::components::{BodyCanvas, BodyTable};
+use crate::agents::simulation_reactor::SimulationReactor;
+use crate::components::body_canvas::BodyCanvas;
+use crate::components::body_table::BodyTable;
 use crate::components::simulation_controls::SimulationControls;
 use crate::components::trajectory_canvas::TrajectoryCanvas;
-use crate::models::RenderedBody;
+use crate::models::rendered_body::RenderedBody;
+use crate::models::settings::Settings;
 
 #[function_component(SimulationPanel)]
 pub fn simulation_panel() -> Html {

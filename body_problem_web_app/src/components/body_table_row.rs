@@ -3,7 +3,7 @@ use web_sys::wasm_bindgen::JsCast;
 use yew::{Callback, function_component, Html, html, Properties};
 
 use crate::components::button::Button;
-use crate::models::RenderedBody;
+use crate::models::rendered_body::RenderedBody;
 
 #[derive(PartialEq, Properties)]
 pub struct BodyTableRowProps {

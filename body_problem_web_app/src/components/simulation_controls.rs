@@ -1,12 +1,16 @@
 use web_sys::MouseEvent;
 use yew::{Callback, function_component, Html, html, Properties};
+use web_sys::{HtmlInputElement, InputEvent, MouseEvent};
+use web_sys::wasm_bindgen::JsCast;
 use crate::components::button::Button;
+use crate::models::settings::Settings;
 
 #[derive(PartialEq, Properties)]
 pub struct SimulationControlsProps {
     pub(crate) simulation_paused: bool,
     pub(crate) toggle_pause_callback: Callback<MouseEvent>,
     pub(crate) reset_callback: Callback<MouseEvent>,
+    pub(crate) set_trajectory_duration_callback: Callback<f64>,
 }
 
 #[function_component(SimulationControls)]

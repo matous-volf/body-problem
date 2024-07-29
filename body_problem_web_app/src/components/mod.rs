@@ -1,14 +1,8 @@
 pub mod app;
-mod simulation_panel;
-mod body_canvas;
-mod body_table;
-mod body_table_row;
-mod simulation_controls;
-mod button;
-mod trajectory_canvas;
-
-pub use app::*;
-pub use simulation_panel::*;
-pub use body_canvas::*;
-pub use body_table::*;
-pub use body_table_row::*;
+pub(crate) mod simulation_panel;
+pub(crate) mod body_canvas;
+pub(crate) mod body_table;
+pub(crate) mod body_table_row;
+pub(crate) mod simulation_controls;
+pub(crate) mod button;
+pub(crate) mod trajectory_canvas;
