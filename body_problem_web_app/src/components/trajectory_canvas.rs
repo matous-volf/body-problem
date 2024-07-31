@@ -1,10 +1,14 @@
-use nalgebra::Vector2;
+use std::collections::VecDeque;
+use web_time::Duration;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement};
-use yew::{function_component, Html, html, Properties, use_effect_with, use_node_ref, use_state};
+use yew::{function_component, Html, html, Properties, use_context, use_effect_with, use_node_ref, use_state};
+
 use crate::models::rendered_body::RenderedBody;
+use crate::models::settings::Settings;
+use crate::models::trajectory_segment::TrajectorySegment;
 use crate::utils::{CanvasClear, SimulationCanvasInitialize};
 
-const TRAJECTORY_MAX_SEGMENT_LENGTH: f64 = 5f64;
+const TRAJECTORY_MAX_SEGMENT_LENGTH: f64 = 0.5f64;
 
 #[derive(Properties, PartialEq)]
 pub struct TrajectoryCanvasProps {
@@ -19,7 +23,8 @@ pub fn trajectory_canvas(props: &TrajectoryCanvasProps) -> Html {
     let canvas_ref = use_node_ref();
     let canvas = canvas_ref.cast::<HtmlCanvasElement>();
     let context = use_state(|| None);
-    let body_positions = use_state(|| vec![props.rendered_bodies.iter().map(|rendered_body| rendered_body.body.position).collect::<Vec<Vector2<f64>>>()]);
+    let trajectory_segments = use_state(|| VecDeque::from([TrajectorySegment::new(props.rendered_bodies.iter().map(|rendered_body| rendered_body.body.position).collect())]));
+    let settings = use_context::<Settings>().unwrap();
 
     {
         let context = context.clone();
@@ -39,10 +44,10 @@ pub fn trajectory_canvas(props: &TrajectoryCanvasProps) -> Html {
     }
 
     let reset = {
-        let body_positions = body_positions.clone();
+        let body_positions = trajectory_segments.clone();
         let context = (*context).clone();
         move || {
-            body_positions.set(Vec::new());
+            body_positions.set(VecDeque::new());
             if let Some(context) = context {
                 context.clear().unwrap();
             }
@@ -75,29 +80,40 @@ pub fn trajectory_canvas(props: &TrajectoryCanvasProps) -> Html {
 
     if let (Some(context), Some(_)) = ((*context).clone(), canvas) {
         let context: CanvasRenderingContext2d = context;
-        if !props.simulation_paused
+        
+        if settings.trajectory_duration <= Duration::ZERO {
+            context.clear().unwrap();
+        } else if !props.simulation_paused
             && !props.simulation_reset
-            && ((*body_positions).is_empty()
+            && ((*trajectory_segments).is_empty()
             || props.rendered_bodies.iter().any(|rendered_body|
-        (rendered_body.body.position - (*body_positions).last().unwrap()[rendered_body.index]).norm() > TRAJECTORY_MAX_SEGMENT_LENGTH)) {
-            let mut body_positions_new: Vec<Vec<Vector2<f64>>> = (*body_positions).clone();
-            body_positions_new.push(props.rendered_bodies.iter().map(|rendered_body| rendered_body.body.position).collect());
+        (rendered_body.body.position - (*trajectory_segments).iter().last().unwrap().positions[rendered_body.index]).norm() > TRAJECTORY_MAX_SEGMENT_LENGTH)) {
+            let mut trajectory_segments_new: VecDeque<TrajectorySegment> = (*trajectory_segments).clone();
+            trajectory_segments_new.push_back(TrajectorySegment::new(props.rendered_bodies.iter().map(|rendered_body| rendered_body.body.position).collect()));
+
+            while let Some(last) = trajectory_segments_new.front() {
+                if last.recorded_at.elapsed() > settings.trajectory_duration {
+                    trajectory_segments_new.pop_front();
+                } else {
+                    break;
+                }
+            }
 
             context.clear().unwrap();
 
             // reversing for a more intuitive layer order
-            for (body_index, rendered_body) in (0..body_positions_new[0].len()).map(|body_index| (body_index, &props.rendered_bodies[body_index])).rev() {
-                let starting_position = body_positions_new.first().unwrap()[body_index];
+            for (body_index, rendered_body) in props.rendered_bodies.iter().enumerate().rev() {
+                let starting_position = trajectory_segments_new.front().unwrap().positions[body_index];
                 context.set_stroke_style(&rendered_body.color.as_str().into());
                 context.begin_path();
                 context.move_to(starting_position.x, -starting_position.y);
-                for position in body_positions_new.iter().map(|positions| positions[body_index]).skip(1) {
+                for position in trajectory_segments_new.iter().map(|trajectory_segment| trajectory_segment.positions[body_index]).skip(1) {
                     context.line_to(position.x, -position.y);
                 }
                 context.stroke();
             }
 
-            body_positions.set(body_positions_new);
+            trajectory_segments.set(trajectory_segments_new);
         }
     }
 

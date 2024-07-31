@@ -1,6 +1,7 @@
+use std::time::Duration;
 use nalgebra::Vector2;
 use web_sys::MouseEvent;
-use yew::{Callback, function_component, Html, html, use_effect_with, use_state};
+use yew::{Callback, ContextProvider, function_component, Html, html, use_effect_with, use_state};
 use yew_agent::prelude::{use_reactor_subscription, UseReactorSubscriptionHandle};
 
 use body_problem::Body;
@@ -38,7 +39,8 @@ pub fn simulation_panel() -> Html {
     let rendered_bodies_edited_this_pause = use_state(|| false);
     let simulation_paused = use_state(|| false);
     let simulation_reset = use_state(|| false);
-    
+    let settings = use_state(|| Settings::new(Duration::from_secs(5)));
+
     let simulation_agent: UseReactorSubscriptionHandle<SimulationReactor> = use_reactor_subscription::<SimulationReactor>();
 
     {
@@ -190,16 +192,26 @@ pub fn simulation_panel() -> Html {
         )
     };
 
+    let set_trajectory_duration_callback = {
+        let settings = settings.clone();
+
+        Callback::from(
+            move |trajectory_duration: Duration| {
+                settings.set(Settings::new(trajectory_duration));
+            }
+        )
+    };
+
     html! {
-        <>
+        <ContextProvider<Settings> context={(*settings).clone()}>
             <div class="h-[700px]">
                 <TrajectoryCanvas rendered_bodies={rendered_bodies_new.clone()} rendered_bodies_edited_this_pause={*rendered_bodies_edited_this_pause} simulation_paused={*simulation_paused} simulation_reset={*simulation_reset}/>
                 <BodyCanvas rendered_bodies={rendered_bodies_new.clone()}/>
             </div>
             <section class="p-4 flex flex-col gap-4">
-                <SimulationControls simulation_paused={*simulation_paused} {toggle_pause_callback} {reset_callback}/>
+                <SimulationControls simulation_paused={*simulation_paused} {toggle_pause_callback} {reset_callback} {set_trajectory_duration_callback}/>
                 <BodyTable rendered_bodies={rendered_bodies_new} edit_allowed={*simulation_paused} add_callback={body_add_callback} edit_callback={body_edit_callback} remove_callback={body_remove_callback}/>
             </section>
-        </>
+        </ContextProvider<Settings>>
     }
 }
