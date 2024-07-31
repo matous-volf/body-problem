@@ -1,8 +1,8 @@
 use yew::{Callback, function_component, Html, html, Properties};
 
-use crate::components::BodyTableRow;
+use crate::components::body_table_row::BodyTableRow;
 use crate::components::button::Button;
-use crate::models::RenderedBody;
+use crate::models::rendered_body::RenderedBody;
 
 #[derive(Properties, PartialEq)]
 pub struct BodyTableProps {
