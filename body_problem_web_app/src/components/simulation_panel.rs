@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use nalgebra::Vector2;
-use web_sys::MouseEvent;
+use web_sys::{MouseEvent, window};
 use yew::{Callback, ContextProvider, function_component, Html, html, use_effect_with, use_state};
 use yew_agent::prelude::{use_reactor_subscription, UseReactorSubscriptionHandle};
 
@@ -200,11 +200,11 @@ pub fn simulation_panel() -> Html {
 
     html! {
         <ContextProvider<Settings> context={(*settings).clone()}>
-            <div class="h-[700px]">
+            <div style={format!("height: {}px", window().unwrap().inner_height().unwrap().as_f64().unwrap() - 150f64)}>
                 <TrajectoryCanvas rendered_bodies={rendered_bodies_new.clone()} rendered_bodies_edited_this_pause={*rendered_bodies_edited_this_pause} simulation_paused={*simulation_paused} simulation_reset={*simulation_reset}/>
                 <BodyCanvas rendered_bodies={rendered_bodies_new.clone()}/>
             </div>
-            <section class="p-4 flex flex-col gap-4">
+            <section class="p-4 flex flex-col gap-8">
                 <SimulationControls simulation_paused={*simulation_paused} {toggle_pause_callback} {reset_callback} {set_settings_callback}/>
                 <BodyTable rendered_bodies={rendered_bodies_new} edit_allowed={*simulation_paused} add_callback={body_add_callback} edit_callback={body_edit_callback} remove_callback={body_remove_callback}/>
             </section>

@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
-use web_time::Duration;
+
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement};
+use web_time::Duration;
 use yew::{function_component, Html, html, Properties, use_context, use_effect_with, use_node_ref, use_state};
 
 use crate::models::rendered_body::RenderedBody;
@@ -80,7 +81,7 @@ pub fn trajectory_canvas(props: &TrajectoryCanvasProps) -> Html {
 
     if let (Some(context), Some(_)) = ((*context).clone(), canvas) {
         let context: CanvasRenderingContext2d = context;
-        
+
         if settings.trajectory_duration <= Duration::ZERO {
             context.clear().unwrap();
         } else if !props.simulation_paused
@@ -118,6 +119,6 @@ pub fn trajectory_canvas(props: &TrajectoryCanvasProps) -> Html {
     }
 
     html! {
-        <canvas ref={canvas_ref} height="700" class="absolute"/>
+        <canvas ref={canvas_ref} class="absolute"/>
     }
 }

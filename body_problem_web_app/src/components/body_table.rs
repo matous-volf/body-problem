@@ -19,7 +19,7 @@ pub fn body_table(props: &BodyTableProps) -> Html {
 
     html! {
         <div class="flex flex-col gap-2 items-start">
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto max-w-full">
                 <table class="table-auto divide-y divide-neutral-600 min-w-full">
                     <thead class="text-neutral-500 whitespace-nowrap">
                         <tr class="divide-x divide-neutral-600">
