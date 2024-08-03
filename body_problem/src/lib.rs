@@ -14,7 +14,7 @@ pub struct Body {
 }
 
 impl Body {
-    pub fn new(mass: f64, position: Vector2<f64>, velocity: Vector2<f64>) -> Self {
+    pub const fn new(mass: f64, position: Vector2<f64>, velocity: Vector2<f64>) -> Self {
         Self { mass, position, velocity }
     }
     

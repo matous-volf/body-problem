@@ -7,3 +7,9 @@ pub(crate) struct RenderedBody {
     pub(crate) potential_energy: f64,
     pub(crate) color: String,
 }
+
+impl RenderedBody {
+    pub const fn new(index: usize, body: Body, color: String) -> Self {
+        Self { index, body, potential_energy: 0f64, color }
+    }
+}

@@ -255,6 +255,7 @@ dependencies = [
  "gloo-utils 0.2.0",
  "log",
  "nalgebra",
+ "serde",
  "serde_json",
  "wasm-logger",
  "web-sys",
