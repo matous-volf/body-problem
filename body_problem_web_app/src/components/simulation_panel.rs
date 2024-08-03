@@ -15,14 +15,14 @@ use crate::components::trajectory_canvas::TrajectoryCanvas;
 use crate::models::rendered_body::RenderedBody;
 use crate::models::settings::Settings;
 
-const SETTINGS_DEFAULT: Settings = Settings::new(Duration::from_secs(5), 1f64);
+const SETTINGS_DEFAULT: Settings = Settings::new(Duration::from_secs(5), 1f64, 0.0001f64, true);
 
 #[function_component(SimulationPanel)]
 pub fn simulation_panel() -> Html {
     let rendered_bodies = use_state(|| vec![
-        RenderedBody::new(0, Body::new(1e16, Vector2::new(0f64, 0f64), Vector2::new(0f64, 0f64)), "#ffffff".to_string()),
-        RenderedBody::new(1, Body::new(1e16, Vector2::new(100f64, -100f64), Vector2::new(0f64, 0f64)), "#ffffff".to_string()),
-        RenderedBody::new(2, Body::new(1e16, Vector2::new(-200f64, -100f64), Vector2::new(0f64, 0f64)), "#ffffff".to_string()),
+        RenderedBody::new(0, Body::new(1e17, Vector2::new(0f64, 0f64), Vector2::new(0f64, -1.52f64)), "#ffff3f".to_string()),
+        RenderedBody::new(1, Body::new(1e15, Vector2::new(300f64, 0f64), Vector2::new(0f64, 149.76f64)), "#5a8cc8".to_string()),
+        RenderedBody::new(2, Body::new(1e13, Vector2::new(320f64, 0f64), Vector2::new(0f64, 206.92f64)), "#bfbfbf".to_string()),
     ]);
     let rendered_bodies_after_last_edit = use_state(|| (*rendered_bodies).clone());
     let rendered_bodies_edited_this_pause = use_state(|| false);

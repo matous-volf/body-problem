@@ -5,6 +5,7 @@ use web_sys::wasm_bindgen::JsCast;
 use yew::{Callback, function_component, Html, html, Properties, use_context};
 
 use crate::components::button::Button;
+use crate::components::validated_input::ValidatedInput;
 use crate::models::settings::Settings;
 
 #[derive(PartialEq, Properties)]
@@ -46,11 +47,9 @@ pub fn simulation_controls(props: &SimulationControlsProps) -> Html {
                         }
                     })}/>
                 <div>
-                    <input id="input_trajectory_duration_text" type="text" class="bg-neutral-800 text-right font-mono text-lg w-24 py-1 px-3 border border-neutral-500 rounded mr-2" value={settings.trajectory_duration.as_millis().to_string()} oninput={props.set_settings_callback.reform(move |e: InputEvent| {
-                            let mut value = e.target().unwrap().unchecked_into::<HtmlInputElement>().value();
-                            if value.is_empty() {
-                                value = "0".to_string();
-                            }
+                    <ValidatedInput id="input_trajectory_duration_text" class="w-24 mr-2"
+                        value={settings.trajectory_duration.as_millis().to_string()}
+                        on_input={props.set_settings_callback.reform(move |value: String| {
                             Settings {
                                 trajectory_duration: Duration::from_millis(value.parse::<u64>().unwrap_or(settings.trajectory_duration.as_millis() as u64)),
                                 ..settings
@@ -67,13 +66,37 @@ pub fn simulation_controls(props: &SimulationControlsProps) -> Html {
                             ..settings
                         }
                     })}/>
-                <input id="input_simulation_speed_text" type="text" class="bg-neutral-800 text-right font-mono text-lg w-16 py-1 px-3 border border-neutral-500 rounded mr-2" value={settings.simulation_speed.to_string()} oninput={props.set_settings_callback.reform(move |e: InputEvent| {
-                        let mut value = e.target().unwrap().unchecked_into::<HtmlInputElement>().value();
-                        if value.is_empty() {
-                            value = "0".to_string();
-                        }
+                <ValidatedInput id="input_simulation_speed_text" class="w-24"
+                    value={settings.simulation_speed.to_string()}
+                    on_input={props.set_settings_callback.reform(move |value: String| {
                         Settings {
                             simulation_speed: value.parse::<f64>().ok().filter(|&value| value >= 0f64).unwrap_or(settings.simulation_speed),
+                            ..settings
+                        }
+                    })}/>
+            </div>
+            <div class="flex flex-row gap-3 items-center">
+                <label for="input_body_circle_radius_range">{"circle radius"}</label>
+                <input id="input_body_circle_radius_range" type="range" class="accent-white" min=0 max=30 step=0.1 value={settings.body_circle_radius.to_string()} oninput={props.set_settings_callback.reform(move |e: InputEvent| {
+                        Settings {
+                            body_circle_radius: e.target().unwrap().unchecked_into::<HtmlInputElement>().value().parse::<f64>().unwrap_or(settings.body_circle_radius),
+                            ..settings
+                        }
+                    })}/>
+                <ValidatedInput id="input_body_circle_radius_text" class="w-24"
+                    value={settings.body_circle_radius.to_string()}
+                    on_input={props.set_settings_callback.reform(move |value: String| {
+                        Settings {
+                            body_circle_radius: if value.is_empty() { 0f64 } else {value.parse::<f64>().ok().filter(|&value| value >= 0f64).unwrap_or(settings.body_circle_radius)},
+                            ..settings
+                        }
+                    })}/>
+            </div>
+            <div class="flex flex-row gap-3 items-center">
+                <label for="input_scale_body_circles_with_mass">{"scale circles with mass"}</label>
+                <input id="input_scale_body_circles_with_mass" type="checkbox" class="accent-white" checked={settings.scale_body_circles_with_mass} oninput={props.set_settings_callback.reform(move |e: InputEvent| {
+                        Settings {
+                            scale_body_circles_with_mass: e.target().unwrap().unchecked_into::<HtmlInputElement>().checked(),
                             ..settings
                         }
                     })}/>
