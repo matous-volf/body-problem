@@ -1,11 +1,13 @@
 use std::time::Duration;
+
 use nalgebra::Vector2;
 use web_sys::MouseEvent;
 use yew::{Callback, ContextProvider, function_component, Html, html, use_effect_with, use_state};
 use yew_agent::prelude::{use_reactor_subscription, UseReactorSubscriptionHandle};
 
 use body_problem::Body;
-use crate::agents::simulation_reactor::SimulationReactor;
+
+use crate::agents::simulation_reactor::{SimulationReactor, SimulationReactorInstruction};
 use crate::components::body_canvas::BodyCanvas;
 use crate::components::body_table::BodyTable;
 use crate::components::simulation_controls::SimulationControls;
@@ -13,41 +15,29 @@ use crate::components::trajectory_canvas::TrajectoryCanvas;
 use crate::models::rendered_body::RenderedBody;
 use crate::models::settings::Settings;
 
+const SETTINGS_DEFAULT: Settings = Settings::new(Duration::from_secs(5), 1f64);
+
 #[function_component(SimulationPanel)]
 pub fn simulation_panel() -> Html {
     let rendered_bodies = use_state(|| vec![
-        RenderedBody {
-            index: 0,
-            body: Body::new(1e16, Vector2::new(0f64, 0f64), Vector2::new(0f64, 0f64)),
-            potential_energy: 0f64,
-            color: "#ffffff".to_string(),
-        },
-        RenderedBody {
-            index: 1,
-            body: Body::new(1e16, Vector2::new(100f64, -100f64), Vector2::new(0f64, 0f64)),
-            potential_energy: 0f64,
-            color: "#ffffff".to_string(),
-        },
-        RenderedBody {
-            index: 2,
-            body: Body::new(1e16, Vector2::new(-200f64, -100f64), Vector2::new(0f64, 0f64)),
-            potential_energy: 0f64,
-            color: "#ffffff".to_string(),
-        },
+        RenderedBody::new(0, Body::new(1e16, Vector2::new(0f64, 0f64), Vector2::new(0f64, 0f64)), "#ffffff".to_string()),
+        RenderedBody::new(1, Body::new(1e16, Vector2::new(100f64, -100f64), Vector2::new(0f64, 0f64)), "#ffffff".to_string()),
+        RenderedBody::new(2, Body::new(1e16, Vector2::new(-200f64, -100f64), Vector2::new(0f64, 0f64)), "#ffffff".to_string()),
     ]);
     let rendered_bodies_after_last_edit = use_state(|| (*rendered_bodies).clone());
     let rendered_bodies_edited_this_pause = use_state(|| false);
     let simulation_paused = use_state(|| false);
     let simulation_reset = use_state(|| false);
-    let settings = use_state(|| Settings::new(Duration::from_secs(5)));
+    let settings = use_state(|| SETTINGS_DEFAULT);
 
     let simulation_agent: UseReactorSubscriptionHandle<SimulationReactor> = use_reactor_subscription::<SimulationReactor>();
 
     {
         let simulation_agent = simulation_agent.clone();
         let bodies = rendered_bodies.clone();
+        let settings = settings.clone();
         use_effect_with((), move |_| {
-            simulation_agent.send(Some((*bodies).iter().map(|b| b.body.clone()).collect()));
+            simulation_agent.send(Some(SimulationReactorInstruction::new(Some((*bodies).iter().map(|b| b.body.clone()).collect()), settings.simulation_speed)));
         });
     }
 
@@ -63,10 +53,10 @@ pub fn simulation_panel() -> Html {
                     simulation_reset.set(false);
                 }
             }
-            
+
             (*rendered_bodies_after_last_edit).to_vec()
         } else {
-            match bodies_new { 
+            match bodies_new {
                 None => (*rendered_bodies).to_vec(),
                 Some(bodies_new) => bodies_new.iter().enumerate().map(|(index, body)| {
                     RenderedBody {
@@ -87,6 +77,7 @@ pub fn simulation_panel() -> Html {
         let simulation_paused = simulation_paused.clone();
         let rendered_bodies_new = rendered_bodies_new.clone();
         let simulation_agent = simulation_agent.clone();
+        let settings = settings.clone();
 
         Callback::from(
             move |_| {
@@ -101,7 +92,7 @@ pub fn simulation_panel() -> Html {
                         rendered_bodies_after_last_edit.set((*rendered_bodies).to_vec());
                         rendered_bodies_edited_this_pause.set(false);
                     }
-                    simulation_agent.send(Some(rendered_bodies_new.iter().map(|b| b.body.clone()).collect()));
+                    simulation_agent.send(Some(SimulationReactorInstruction::new(Some(rendered_bodies_new.iter().map(|b| b.body.clone()).collect()), settings.simulation_speed)));
                 }
             }
         )
@@ -113,6 +104,7 @@ pub fn simulation_panel() -> Html {
         let simulation_paused = simulation_paused.clone();
         let simulation_agent = simulation_agent.clone();
         let simulation_reset = simulation_reset.clone();
+        let settings = settings.clone();
 
         Callback::from(
             move |_| {
@@ -120,12 +112,12 @@ pub fn simulation_panel() -> Html {
                 if *simulation_paused {
                     rendered_bodies.set((*rendered_bodies_after_last_edit).to_vec());
                 } else {
-                    simulation_agent.send(Some((*rendered_bodies_after_last_edit).iter().map(|b| b.body.clone()).collect()));
+                    simulation_agent.send(Some(SimulationReactorInstruction::new(Some((*rendered_bodies_after_last_edit).iter().map(|b| b.body.clone()).collect()), settings.simulation_speed)));
                 }
             }
         )
     };
-    
+
     let body_add_callback = {
         let rendered_bodies = rendered_bodies.clone();
         let rendered_bodies_edited_this_pause = rendered_bodies_edited_this_pause.clone();
@@ -138,7 +130,7 @@ pub fn simulation_panel() -> Html {
                 if !*simulation_paused {
                     toggle_pause_callback.emit(MouseEvent::new("").unwrap());
                 }
-                
+
                 let mut rendered_bodies_new: Vec<RenderedBody> = rendered_bodies_new.to_vec();
                 rendered_bodies_edited_this_pause.set(true);
 
@@ -166,14 +158,14 @@ pub fn simulation_panel() -> Html {
                 if rendered_bodies_new[index] == rendered_body {
                     return;
                 }
-                
+
                 rendered_bodies_new[index] = rendered_body;
                 rendered_bodies.set(rendered_bodies_new);
                 rendered_bodies_edited_this_pause.set(true);
             }
         )
     };
-    
+
     let body_remove_callback = {
         let rendered_bodies = rendered_bodies.clone();
         let rendered_bodies_edited_this_pause = rendered_bodies_edited_this_pause.clone();
@@ -185,19 +177,23 @@ pub fn simulation_panel() -> Html {
                 for (index, rendered_body) in rendered_bodies_new.iter_mut().enumerate() {
                     rendered_body.index = index;
                 }
-                
+
                 rendered_bodies.set(rendered_bodies_new);
                 rendered_bodies_edited_this_pause.set(true);
             }
         )
     };
 
-    let set_trajectory_duration_callback = {
+    let set_settings_callback = {
         let settings = settings.clone();
 
         Callback::from(
-            move |trajectory_duration: Duration| {
-                settings.set(Settings::new(trajectory_duration));
+            move |settings_new: Settings| {
+                if settings_new.simulation_speed != settings.simulation_speed {
+                    simulation_agent.send(Some(SimulationReactorInstruction::new(None, settings_new.simulation_speed)));
+                }
+
+                settings.set(settings_new);
             }
         )
     };
@@ -209,7 +205,7 @@ pub fn simulation_panel() -> Html {
                 <BodyCanvas rendered_bodies={rendered_bodies_new.clone()}/>
             </div>
             <section class="p-4 flex flex-col gap-4">
-                <SimulationControls simulation_paused={*simulation_paused} {toggle_pause_callback} {reset_callback} {set_trajectory_duration_callback}/>
+                <SimulationControls simulation_paused={*simulation_paused} {toggle_pause_callback} {reset_callback} {set_settings_callback}/>
                 <BodyTable rendered_bodies={rendered_bodies_new} edit_allowed={*simulation_paused} add_callback={body_add_callback} edit_callback={body_edit_callback} remove_callback={body_remove_callback}/>
             </section>
         </ContextProvider<Settings>>
