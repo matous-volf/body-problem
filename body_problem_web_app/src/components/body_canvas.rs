@@ -2,6 +2,7 @@ use std::f64::consts::PI;
 
 use web_sys::HtmlCanvasElement;
 use yew::{function_component, Html, html, Properties, use_context, use_effect_with, use_node_ref, use_state};
+
 use crate::models::rendered_body::RenderedBody;
 use crate::models::settings::Settings;
 use crate::utils::{CanvasClear, SimulationCanvasInitialize};
@@ -54,6 +55,6 @@ pub fn body_canvas(props: &BodyCanvasProps) -> Html {
     }
 
     html! {
-        <canvas ref={canvas_ref} height="700" class="absolute"/>
+        <canvas ref={canvas_ref} class="absolute"/>
     }
 }
