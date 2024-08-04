@@ -24,7 +24,7 @@ impl SimulationCanvasInitialize for HtmlCanvasElement {
     fn initialize_for_simulation(self, context_state: UseStateHandle<Option<CanvasRenderingContext2d>>, enable_alpha: bool) -> EventListener {
         let initialize_context = Callback::from(move |_: yew::html::onresize::Event| {
             self.set_width(window().unwrap().inner_width().unwrap().as_f64().unwrap() as u32);
-            self.set_height(window().unwrap().inner_height().unwrap().as_f64().unwrap() as u32 - 150);
+            self.set_height((window().unwrap().inner_height().unwrap().as_f64().unwrap() as u32).saturating_sub(150));
 
             let context_new: CanvasRenderingContext2d = self
                 .get_context_with_context_options("2d", &JsValue::from_serde(&serde_json::json!({
