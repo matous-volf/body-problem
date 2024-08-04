@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/three_body_problem.iml" filepath="$PROJECT_DIR$/.idea/three_body_problem.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/body-problem.iml" filepath="$PROJECT_DIR$/.idea/body-problem.iml" />
     </modules>
   </component>
 </project>
