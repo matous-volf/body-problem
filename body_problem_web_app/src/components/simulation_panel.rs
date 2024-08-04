@@ -1,9 +1,10 @@
 use std::time::Duration;
 
 use nalgebra::Vector2;
-use web_sys::{MouseEvent, window};
+use web_sys::MouseEvent;
 use yew::{Callback, ContextProvider, function_component, Html, html, use_effect_with, use_state};
 use yew_agent::prelude::{use_reactor_subscription, UseReactorSubscriptionHandle};
+use yew_hooks::use_window_size;
 
 use body_problem::Body;
 
@@ -198,9 +199,10 @@ pub fn simulation_panel() -> Html {
         )
     };
 
+    let window_size = use_window_size();
     html! {
         <ContextProvider<Settings> context={(*settings).clone()}>
-            <div style={format!("height: {}px", window().unwrap().inner_height().unwrap().as_f64().unwrap() - 150f64)}>
+            <div style={format!("height: {}px", (window_size.1 - 150f64).max(0f64))}>
                 <TrajectoryCanvas rendered_bodies={rendered_bodies_new.clone()} rendered_bodies_edited_this_pause={*rendered_bodies_edited_this_pause} simulation_paused={*simulation_paused} simulation_reset={*simulation_reset}/>
                 <BodyCanvas rendered_bodies={rendered_bodies_new.clone()}/>
             </div>
