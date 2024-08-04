@@ -7,8 +7,8 @@ services:
       - "8000:8000"
     volumes:
       - ../:/srv/app
-      - /dev/null:/srv/app/docker-compose-dev.yml
-      - /dev/null:/srv/app/docker-compose-prod.yml
+      - /dev/null:/srv/app/body_problem_web_app/docker-compose-dev.yml
+      - /dev/null:/srv/app/body_problem_web_app/docker-compose-prod.yml
       - /srv/app/body_problem_web_app/node_modules/
       - /srv/app/body_problem_web_app/dist/
       - /srv/app/.git/

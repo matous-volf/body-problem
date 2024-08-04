@@ -1,19 +1,17 @@
 FROM rust:1.80 as builder_app
 
-COPY ./ /srv/app/
-
-WORKDIR /srv/app/body_problem_web_app
-
-RUN cargo install trunk
-
-RUN rustup target add wasm32-unknown-unknown
-
-RUN trunk build --release
-
 RUN apt update \
   && apt install -y brotli \
   && apt clean \
   && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+RUN cargo install trunk
+RUN rustup target add wasm32-unknown-unknown
+
+COPY ./ /srv/app/
+WORKDIR /srv/app/body_problem_web_app
+
+RUN trunk build --release
 
 RUN find dist/ \( -name "*.js" -o -name "*.css" -o -name "*.html" \) -exec brotli -6 -o {}.br {} \;
 
@@ -32,7 +30,7 @@ RUN cd nginx-1.27.0 && ./configure --with-compat --add-dynamic-module=../ngx_bro
 FROM nginx:1.27.0
 COPY --from=builder_nginx /app/nginx-1.27.0/objs/ngx_http_brotli_static_module.so /etc/nginx/modules/
 
-COPY ./docker/web-server-prod/nginx.conf /etc/nginx/nginx.conf
-COPY ./docker/web-server-prod/default.conf /etc/nginx/conf.d/default.conf
+COPY ./body_problem_web_app/docker/web-server-prod/nginx.conf /etc/nginx/nginx.conf
+COPY ./body_problem_web_app/docker/web-server-prod/default.conf /etc/nginx/conf.d/default.conf
 
-COPY --from=builder_app /srv/app/dist/ /var/www/html/public/
+COPY --from=builder_app /srv/app/body_problem_web_app/dist/ /var/www/html/public/
