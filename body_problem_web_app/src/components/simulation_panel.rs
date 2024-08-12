@@ -2,9 +2,9 @@ use std::time::Duration;
 
 use nalgebra::Vector2;
 use web_sys::MouseEvent;
-use yew::{Callback, ContextProvider, function_component, Html, html, use_effect_with, use_state};
+use yew::{function_component, html, use_state, Callback, ContextProvider, Html};
 use yew_agent::prelude::{use_reactor_subscription, UseReactorSubscriptionHandle};
-use yew_hooks::use_window_size;
+use yew_hooks::{use_effect_once, use_window_size};
 
 use body_problem::Body;
 
@@ -69,11 +69,12 @@ pub fn simulation_panel() -> Html {
         let simulation_agent = simulation_agent.clone();
         let rendered_state = rendered_state.clone();
         let settings = settings.clone();
-        use_effect_with((), move |_| {
+        use_effect_once(move || {
             simulation_agent.send(Some(SimulationReactorInstruction::new(
                 Some((*rendered_state).clone().into()),
                 settings.simulation_speed,
-            )))
+            )));
+            || ()
         });
     }
 
@@ -187,7 +188,7 @@ pub fn simulation_panel() -> Html {
                     color: "#ffffff".to_string(),
                 });
                 rendered_state_new.duration_elapsed_total = Duration::ZERO;
-                
+
                 rendered_state.set(rendered_state_new);
                 rendered_state_edited_this_pause.set(true);
             }
@@ -210,7 +211,7 @@ pub fn simulation_panel() -> Html {
 
                 rendered_state_new.rendered_bodies[index] = rendered_body;
                 rendered_state_new.duration_elapsed_total = Duration::ZERO;
-                
+
                 rendered_state.set(rendered_state_new);
                 rendered_state_edited_this_pause.set(true);
             }
