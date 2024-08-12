@@ -21,6 +21,11 @@ impl SimulationReactorInstruction {
     }
 }
 
+struct SimulationResult {
+    bodies: Vec<Body>,
+    duration_elapsed_total: Duration,
+}
+
 #[reactor(SimulationReactor)]
 pub async fn simulation_reactor(
     /*
@@ -50,7 +55,7 @@ pub async fn simulation_reactor(
     let mut taken_duration = Duration::ZERO;
 
     loop {
-        // For some reason, it is required to always sleep for some time on order for the agent to work.
+        // For some reason, it is required to always sleep for some time in order for the agent to work.
         async_std::task::sleep(Duration::from_millis((1000f64 / TARGET_FPS) as u64).checked_sub(taken_duration).unwrap_or(Duration::from_nanos(1))).await;
 
         let start = Instant::now();
