@@ -11,6 +11,7 @@ use body_problem::Body;
 use crate::agents::simulation_reactor::{SimulationReactor, SimulationReactorInstruction, SimulationState};
 use crate::components::body_canvas::BodyCanvas;
 use crate::components::body_table::BodyTable;
+use crate::components::energy_sum_table::EnergySumTable;
 use crate::components::simulation_controls::SimulationControls;
 use crate::components::trajectory_canvas::TrajectoryCanvas;
 use crate::models::rendered_body::RenderedBody;
@@ -266,9 +267,10 @@ pub fn simulation_panel() -> Html {
                 <SimulationControls simulation_paused={*simulation_paused} {toggle_pause_callback}
                     {reset_callback} {set_settings_callback}
                     duration_elapsed_total={rendered_state_new.duration_elapsed_total}/>
-                <BodyTable rendered_bodies={rendered_state_new.rendered_bodies}
+                <BodyTable rendered_bodies={rendered_state_new.rendered_bodies.clone()}
                     edit_allowed={*simulation_paused} add_callback={body_add_callback}
                     edit_callback={body_edit_callback} remove_callback={body_remove_callback}/>
+                <EnergySumTable rendered_bodies={rendered_state_new.rendered_bodies}/>
             </section>
         </ContextProvider<Settings>>
     }
