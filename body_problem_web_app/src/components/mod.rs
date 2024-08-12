@@ -8,3 +8,4 @@ mod button;
 mod trajectory_canvas;
 mod validated_input;
 mod footer;
+mod energy_sum_table;

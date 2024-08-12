@@ -142,8 +142,8 @@ pub fn BodyTableRow(props: &BodyTableRowProps) -> Html {
                     }
                 }
             }
-            <td class="py-2 px-4 text-right">{format!("{:\u{00a0}>25.1}", rendered_body.potential_energy)}</td>
-            <td class="py-2 px-4 text-right">{format!("{:\u{00a0}>25.1}", rendered_body.body.kinetic_energy())}</td>
+            <td class="py-2 px-4 text-right">{format!("{:\u{00a0}>30.1}", rendered_body.potential_energy)}</td>
+            <td class="py-2 px-4 text-right">{format!("{:\u{00a0}>30.1}", rendered_body.body.kinetic_energy())}</td>
             {
                 props.edit_allowed.then(|| {
                     let rendered_body = rendered_body.clone();
