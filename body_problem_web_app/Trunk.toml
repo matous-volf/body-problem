@@ -1,3 +1,5 @@
 [serve]
-
 port = 8000
+
+[tools]
+wasm_opt = "version_117"
