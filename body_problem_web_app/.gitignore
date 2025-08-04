@@ -1,3 +1,5 @@
-dist/
-node_modules/
-src/styles/output.css
+/dist
+node_modules
+/src/styles/output.css
+
+/docker-compose.yaml
