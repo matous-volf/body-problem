@@ -1,1 +1,1 @@
-pub(crate) mod use_google_analytics;
+pub(crate) mod use_umami_analytics;
