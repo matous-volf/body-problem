@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> This project has been moved to Gitea: https://gitea.com/matous-volf/body-problem.
+
 # Body problem
 
 A simulation of the [n-body problem](https://en.wikipedia.org/wiki/N-body_problem) (which is a generalization of, for
