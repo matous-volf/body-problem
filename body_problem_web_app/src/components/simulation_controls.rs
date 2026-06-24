@@ -25,7 +25,7 @@ pub fn simulation_controls(props: &SimulationControlsProps) -> Html {
         <>
             <div class="flex flex-col sm:items-center sm:flex-row gap-6">
                 <div class="grid grid-cols-2 justify-stretch sm:grid-cols-none sm:flex sm:flex-row gap-3 shrink">
-                    <Button onclick={props.toggle_pause_callback.clone()} class="py-2 px-4 sm:w-24">
+                    <Button onclick={props.toggle_pause_callback.clone()} class="py-2 px-4 sm:w-28">
                         {if props.simulation_paused {
                             html! {
                                 <><i class="fa-solid fa-play mr-2"></i>{"play"}</>
@@ -36,7 +36,7 @@ pub fn simulation_controls(props: &SimulationControlsProps) -> Html {
                             }
                         }}
                     </Button>
-                    <Button onclick={props.reset_callback.clone()} class="py-2 px-4 sm:w-24">
+                    <Button onclick={props.reset_callback.clone()} class="py-2 px-4 sm:w-28">
                         <i class="fa-solid fa-rotate-right mr-2"></i>{"reset"}
                     </Button>
                 </div>
