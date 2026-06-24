@@ -11,8 +11,8 @@ pub fn footer() -> Html {
                 </a>
             </span>
             <span class="sm:pl-5">
-                <a href="https://github.com/matous-volf/body-problem" target="_blank">
-                    <i class="fa-brands fa-github mr-2"></i>
+                <a href="https://codeberg.org/matous-volf/body-problem" target="_blank">
+                    <i class="fa-classic fa-file-code mr-2"></i>
                     <span class="underline">{"source code"}</span>
                 </a>
             </span>
